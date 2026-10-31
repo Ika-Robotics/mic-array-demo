@@ -1,0 +1,26 @@
+Checked on 2026-10-30 on this PC
+
+PASS: UMA16v2 identified by VID_2752/PID_0019, miniDSP driver 4.82.
+PASS: miniDSP ASIO Driver exposes and captures 16 channels at 48000 Hz.
+PASS: all 16 channels contain nonzero audio, without clipping in the checks.
+PASS: initial two-second Python/PortAudio capture had zero overruns.
+PASS: native processing/capture check and subsequent live run had zero overruns.
+PASS: native processing roughly 23-35 ms per 171 ms audio block.
+PASS: synthetic sources at left/below, right/above, and center were localized
+      within the scan-grid tolerance; silence produced no detection.
+PASS: native UI rendered and was visually inspected using preview.bmp.
+PASS: no new Kernel-Power 41 event since the successful driver reconnection.
+
+NOT YET VERIFIED: actual camera frames. The external icspring camera is
+enumerated but camera activation returns 0x80070005 (Access denied) from
+the restricted coding session. Camera consent at the machine level is Allow.
+The built native app should be launched directly by the user from File Explorer
+to distinguish session restrictions from Windows camera/privacy configuration.
+
+NOT YET VERIFIED: physical left/right/up/down alignment, lens field of view,
+camera image orientation, and tracking a known real source against the image.
+Use the on-screen controls to orient the direction map after this first check.
+
+The automated live test instance was stopped to release the ASIO microphone
+before the user launches Start Demo.cmd. live-status.txt describes the last
+run and is refreshed approximately every two seconds while the app is running.

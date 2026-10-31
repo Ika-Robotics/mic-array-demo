@@ -1,0 +1,79 @@
+LOCAL STATUS CONTRACT -- PREPARATION FOR IKA, NOT AN ACTIVE INTEGRATION
+
+NEW GEOMETRY FOCUS MODE
+File: ika-focus-status.json (separate from the legacy calibrated status below).
+Writer: MicArrayFocus-Buffered.exe in its default/--focus mode, about every 330 ms.
+schema_version=1; mode="geometry_mouth_focus"; timestamp_ms is UTC Unix time;
+process_id and audio_sequence identify freshness. Reject stale files (>1 sec).
+available requires fresh camera/audio, all channels and no clipping/error.
+target_selected means the user clicked a fixed mouth point. mouth_normalized
+and array_ray_slopes describe that chosen target, NOT a detected speaker.
+calibrated=false. speech_detected and person_speaking are null;
+speech_detector_enabled=false. No voice-activity detector is included yet.
+audio_error/camera_error hold device errors. unavailable targets must not be
+used as active evidence. Neither this file nor the legacy one transports audio.
+Additional diagnostics: target_change_reason (not_selected, mouth_clicked,
+user_cleared), camera_change_count, recording_state, recorded_samples,
+status_note and audio_overruns. Automatic device events retain the selected
+point; available=false still prevents treating it as an active audio result.
+audio_available separately reports fresh microphone input without requiring
+camera video or unclipped audio. Recording uses this once a point is set.
+recording_alert is the persistent user-visible warning/failure explanation;
+last_stop_reason preserves the latest abort/save failure. recording_input_gap_events,
+recording_queue_drops and recording_clipped_blocks count quality defects in
+the current/last capture. processing_ms measures analysis time per block.
+focus-events.log appends recording lifecycle events and failures with timestamp,
+process ID and sample count; it contains no audio. Recoverable gaps/clipping
+warn rather than cancel. Camera changes are deferred until recording finishes.
+Only a user-requested ten-second comparison writes audio; see SPEECH-FOCUS.txt.
+No robot service is connected by this mode.
+
+LEGACY CALIBRATED WIZARD
+File: ika-audio-status.json
+Writer: MicArrayWizard.exe, approximately every 330 ms and on graceful exit.
+Writes use a temporary file and atomic replacement. One wizard instance runs
+per Windows session. This is not an HTTP endpoint or network API.
+
+schema_version: 1
+timestamp_ms: UTC Unix epoch milliseconds when the snapshot was published.
+process_id: writer process ID.
+audio_sequence: increases only when a fresh audio block is processed.
+state: setup_required | unavailable | quiet | uncertain |
+       sound_in_region | sound_outside_region
+calibrated: valid setup applied to matching hardware/resolution.
+audio_fresh / camera_fresh: recent data arrived without a reported device error.
+sound_in_interaction_region: true, false or null.
+  true: recent tracked sound projects inside the selected image region.
+  false: quiet/no sound detection, or tracked sound outside the region.
+  null: setup missing, devices stale/unavailable, or direction uncertain.
+normalized_image_position: [x,y] or null. Top-left is [0,0]; bottom-right [1,1].
+  Values outside this range indicate an off-camera estimated direction.
+level_dbfs: overall microphone level; null when audio is stale/nonfinite.
+gate_dbfs: current sound-detection threshold.
+audio_overruns: input buffer overruns for the current capture connection.
+audio_error / camera_error: diagnostic text; empty if no current reported error.
+
+speech_detected: null
+person_speaking: null
+speech_detector_enabled: false
+
+The last three fields are deliberately fixed until speech detection and
+audio/visual association are implemented. Do not treat sound_in_interaction_region
+as voice activity, engagement, identity, or proof of physical front/back.
+
+CONSUMER REQUIREMENTS
+
+Reject missing, malformed or unsupported-schema data. Treat a file older than
+one second as unavailable; unexpected exit can leave the last JSON on disk.
+Require fresh audio/camera and calibrated=true before using position. Treat
+null as unknown, never as evidence of silence. Timestamp/sequence reset across
+process restarts. Direction is a candidate signal only: the planar array cannot
+resolve front/back by timing alone.
+
+NEXT IMPLEMENTATION
+
+Add speech/non-speech classification on actual audio, align speech timing with
+direction estimates, associate a tracked visual person with the acoustic region,
+then evaluate false triggers from fans, playback, other speakers and reflections.
+Define Ika's turn-taking policy from those measured signals. The wizard's tests
+validate localization during setup, not speech recognition accuracy.

@@ -1,0 +1,7 @@
+mediapipe==1.2.0
+opencv-python==5.0.0.93
+numpy==2.5.4
+scipy==1.18.1
+sounddevice==0.5.6
+soundfile==0.14.0
+cv2-enumerate-cameras==1.4.0

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "timestamp_ms": 1793412839891,
+  "process_id": 24520,
+  "audio_sequence": 272,
+  "state": "sound_outside_region",
+  "calibrated": true,
+  "audio_fresh": true,
+  "camera_fresh": true,
+  "sound_in_interaction_region": false,
+  "speech_detected": null,
+  "person_speaking": null,
+  "speech_detector_enabled": false,
+  "normalized_image_position": [0.9, 0.5],
+  "level_dbfs": -40.000000,
+  "gate_dbfs": -59,
+  "audio_overruns": 0,
+  "audio_error": "",
+  "camera_error": ""
+}

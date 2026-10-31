@@ -1,0 +1,90 @@
+IKA -- FIXED MOUTH TARGET / GEOMETRY-BASED AUDIO FOCUS
+
+START
+Close other microphone demos, then double-click Start Speech Focus.cmd in File
+Explorer. Start Demo.cmd now opens this same view. No room measurement, phone
+tone, alignment captures or saved calibration profile is needed.
+
+1. Wait for live external video and the 16-channel array.
+2. Click your MOUTH in the video. The cyan marker stays at that image location.
+3. Click Record comparison. A three-second countdown precedes ten seconds of
+   audio recording. Keep your mouth at the point and speak normally; the crowd
+   can continue. Moving the target/geometry is locked during recording.
+4. Click Play original, then Play focused. Keep your playback volume the same.
+5. Open comparison files if you want to inspect or share the clips.
+
+There is no automatic face tracking. Click again after you move. An orange
+marker, when enabled, indicates the strongest sound; it does not steer focus.
+It defaults off and pauses during recording to reduce processing.
+The cyan mouth target steers it even if someone elsewhere is louder.
+The panel shows "Mouth target: LOCKED" after selection. Only a new mouth click
+or Clear mouth target changes that selection during the session. Device errors
+and camera changes keep the point; a real interruption can still stop recording
+with an explanation. Check the point if the camera itself moves or changes.
+
+COMPARISON FILES
+Each completed recording creates a new timestamped folder under recordings/:
+  original.wav: microphone 1, unfiltered (with common processing delay).
+  focused.wav: all 16 microphones delayed and averaged toward your mouth,
+               then filtered to 150-3800 Hz.
+  reference-speech-band.wav: microphone 1 with that same frequency filter.
+  settings.json: selected point, geometry, devices, algorithm and playback gain.
+
+All files are mono PCM16 at 48 kHz, ten seconds of received samples. Gaps can
+extend capture time and create discontinuities; settings.json records them. They use ONE common
+playback gain based on the largest peak across all three files. They are not
+normalized independently. Compare Focused against Speech-band reference to
+hear direction filtering separately from the removal of low/high frequencies.
+
+Only pressing Record writes real audio. The countdown and cancelled captures
+are not saved. No video or full 16-channel recording is saved. Playback stops
+before the countdown; there is no live audio feedback/monitoring. Microphone
+capture runs independently of processing. Recoverable overruns and clipping
+show an amber warning and let recording continue. A stalled camera preview
+does not stop audio or change the fixed direction. A microphone error or no
+fresh microphone samples for three seconds stops recording with a persistent
+red banner. focus-events.log preserves recording events and stop reasons.
+Settings include input_overflow_events, processing_queue_dropped_blocks,
+clipped_blocks, quality_warning, capture_wall_seconds and duration_basis.
+
+GEOMETRY
+Defaults match the initial demo: 4x4 array with 42 mm microphone spacing,
+80-degree assumed horizontal camera FOV, centered camera pointing forward,
+no flips and no rotation. Actual video aspect ratio sets vertical FOV.
+FOV -/+ and Rotate/Flip controls let you correct an obvious mismatch without
+sound calibration. These are assumptions, not a measured camera calibration.
+Keep the camera centered and rigidly aligned with the array. The target and
+manual adjustments reset on restart; saved wizard profiles are not modified.
+
+WHAT THIS DOES
+Fractional delay-and-sum beamforming emphasizes the selected direction. A
+speech-band filter removes rumble and high-frequency sound. There is no room
+noise gate, so a loud crowd cannot block capture of the selected direction.
+
+It does not identify your voice or prove your mouth is speaking. Nearby voices
+at the same angle, low-frequency sound and room reflections may remain. A flat
+array also has front/back ambiguity. At close distances, camera lens/FOV error
+and the far-field assumption can reduce accuracy. The marker is not a tight
+acoustic boundary around the mouth. Listen to the comparison before judging
+whether this is sufficient for Ika; real-world separation is not yet validated.
+
+IKA
+ika-focus-status.json is a separate local geometry/target status file. It does
+not carry audio. calibrated=false and speech/person-speaking remain unknown.
+No Ika service is changed or connected. See IKA-INTEGRATION.txt for details.
+
+BUILD / CHECKS
+build.cmd produces MicArrayFocus-Buffered.exe (default: speech focus).
+  MicArrayFocus-Buffered.exe --focus-tests
+  MicArrayFocus-Buffered.exe --render-focus-tests
+  MicArrayFocus-Buffered.exe --self-test
+Legacy wizard remains available with --wizard / Start Setup Wizard.cmd.
+Tests use synthetic sources and write only under test-output.
+
+REFERENCE
+https://www.mathworks.com/help/audio/ug/acoustic-beamforming-using-a-microphone-array.html
+
+LIVE CAPTURE CHECK
+Close the demo, then run MicArrayFocus-Buffered.exe --focus-capture-check.
+This opens the real array for 64 blocks, with additional simulated processing
+delay, and reports overruns/drops. It saves and plays no audio.

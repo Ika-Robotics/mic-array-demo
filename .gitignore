@@ -1,0 +1,44 @@
+# Environments / caches
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+
+# Secrets (keys are read from %LOCALAPPDATA%\Ika\simulator\.env, never from the repo)
+.env
+.env.*
+*.key
+*.pem
+
+# Personal data: voice recordings, face templates
+recordings/
+*.wav
+vision/me.npz
+*.npz
+
+# Device-specific local calibration / runtime status
+setup-profile.ini
+!test-output/workflow/setup-profile.ini
+vision/beam-calibration.json
+*.tmp
+*-status.json
+!test-output/workflow/status-*.json
+live-status.txt
+audio-check.json
+*.log
+
+# Build outputs
+*.exe
+*.obj
+*.pdb
+*.ilk
+
+# Generated screenshots / test renders (large)
+*.bmp
+*-annotated.png
+test-output/*
+!test-output/workflow/
+
+# Third-party models and test images: fetched by vision/fetch_assets.py
+vision/models/
+vision/testdata/

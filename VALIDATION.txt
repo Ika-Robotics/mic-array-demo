@@ -1,0 +1,134 @@
+BUFFERED RECORDING FIX -- 2026-10-30
+Observed user's last status: audio_sequence=453, audio_overruns=214,
+target_selected=true, camera_change_count=0, recorded_samples=0, and
+"Recording cancelled: audio dropped samples. Retry after the stream is stable."
+The old policy cancelled on any new overflow. Acquisition and processing
+shared a thread. Added dedicated continuous acquisition with a bounded queue;
+optional localization defaults off and pauses while recording.
+Recoverable gaps/clipping now warn and continue; camera stalls do not abort
+fixed-direction capture. Actual microphone failures/stalls retain the target
+and show a persistent red banner, diagnostic status and event log.
+PASS: native build of MicArrayFocus-Buffered.exe; launchers updated.
+PASS: queue ordering, bounded drops and error propagation.
+PASS: complete synthetic capture despite 29 input overflow events, 5 dropped
+      queue blocks, 6 clipped blocks, stale video and louder moving sounds.
+PASS: microphone failure/stall stops with a persistent reason; geometry stays
+      frozen during capture, and explicit target selection/clearing works.
+PASS: DSP tests, ten-second WAV output and UI tests at five window sizes;
+      visible warning/stopped states rendered and visually inspected.
+PASS: live ASIO hardware capture of 64 blocks in 11.6077 seconds, zero input
+      overruns and zero queue drops, mean focus processing 2.33487 ms/block.
+      Consumer deliberately delayed 35 ms per block to exercise buffering.
+The live check saved/played no audio and did not open the camera. Concurrent
+live camera/UI behavior and speech separation in the crowd still require a
+user run. Synthetic recordings are isolated under test-output. No driver,
+saved calibration profile, existing recordings or Ika service was changed.
+
+WIZARD VALIDATION -- 2026-10-30
+
+LOCKED-TARGET FIX -- 2026-10-30
+Removed automatic target clearing on camera changes and audio errors. Only
+explicit UI selection/clearing changes the manual point during a session.
+Camera identity handling is extracted and tested. The previous camera ID
+assignment was correct; it was not a proven cause of the reported behavior.
+The exact physical event in the user's session was not captured by the old
+status file. Added target-change, camera-change and recording diagnostics.
+Real device failures still stop invalid recordings, while preserving the point.
+PASS: complete synthetic ten-second capture with louder moving sound elsewhere;
+      target coordinates and revision remain unchanged throughout.
+PASS: repeated/missing metadata, camera ID/resolution changes, audio failure
+      and capture cancellation all retain the selected point.
+PASS: explicit Clear works; existing DSP, capture and five-size UI tests pass.
+Built MicArrayFocus-Fixed.exe; all current launchers use the updated binary.
+No real audio recorded, played or device settings modified during validation.
+
+GEOMETRY / MOUTH FOCUS UPDATE -- 2026-10-30
+PASS: built MicArrayFocus.exe. Default and --focus open the direct mouth-target
+      view; Start Demo and Start Speech Focus use it. --wizard retains setup.
+PASS: default centered 80-degree geometry and all rotation/flip round trips.
+PASS: fractional delay-and-sum streaming is identical across audio-block splits.
+PASS: selected synthetic broadband source preserved within 0.013 dB relative
+      to a single microphone with the same speech-band filter.
+PASS: separated off-axis synthetic source reduced by 7.89 dB; resulting SIR
+      improvement 7.90 dB. Independent microphone noise reduced by 12.03 dB.
+PASS: same-direction interference is retained, documenting the limitation.
+PASS: silent input stays silent; processing ~1.5 ms per 171 ms audio block
+      for the focus stage alone (direction display has additional processing).
+PASS: exact 480,000-sample recordings, countdown exclusion, cancellation,
+      stale-input rejection and synthetic WAV generation.
+PASS: independent PowerShell parsing confirms WAV duration/format, shared gain
+      ratios, metadata and honest uncalibrated/unknown-speech telemetry.
+PASS: UI renders and actual mouse messages at five sizes from 960x680 to 4K;
+      fixed-mouth clicks, clear target and recording lock work at each scale.
+PASS: visual inspection of selected, recording and playback-ready states.
+PASS: original direction self-tests and legacy wizard setup regressions.
+
+No real microphone audio was recorded or played by these checks. Phone/array
+hardware, actual room separation and Windows playback still need a manual run.
+Synthetic results do not measure performance with the user's voice or crowd.
+No saved wizard profile, driver, privacy setting or Ika service was changed.
+Only an explicit Record button press saves real audio; video is not saved.
+
+PHONE-TONE UPDATE -- 2026-10-30
+PASS: built MicArrayWizard-Tone.exe; launchers use this version.
+PASS: 12 synthetic directions at 438, 440 and 442 Hz with three louder
+      competing harmonic sources and independent microphone noise.
+PASS: rejects tested crowd-only, silence, off-frequency tones, buried tone,
+      inconsistent spatial phases, clipping and nonfinite samples.
+PASS: separate tone capture bypasses broadband gate; absent tone cannot fall
+      back to crowd direction; source switching clears alignment/verification.
+PASS: existing broadband direction tests and full setup workflow regressions.
+PASS: nine stage renders, five display sizes and scaled input checks; visual
+      inspection of the 440 Hz alignment and verification panels.
+Measured combined broadband + tone analysis: 23.9 ms per 171 ms audio block
+in the synthetic benchmark on this PC (not a live-device latency measurement).
+Generated and checked 440Hz-calibration.wav: mono PCM16, 48 kHz, 60 seconds,
+440 positive zero crossings in one steady-state second. No audio was recorded.
+
+Physical calibration with the user's phone and actual crowd is still untested.
+Tone lock does not prove source identity: another 440 Hz source or coherent
+reflection can bias it. Independent verification remains required. Live sound
+and interaction trials retain broadband localization; speech detection remains
+unimplemented. No driver, saved calibration profile or Ika service was changed.
+
+DISPLAY UPDATE -- 2026-10-30
+PASS: rebuilt MicArrayWizard-Readable.exe with responsive UI scaling and
+      larger character-height text; launchers point to the updated executable.
+PASS: nine synthetic stage renders plus layouts at 960x680, 1280x840,
+      1920x1080, 2880x1800 and 3840x2160.
+PASS: actual window messages select the correct calibration point, drag the
+      correct interaction area and activate Back at all five sizes.
+PASS: visual review of alignment, location-test, review and live layouts.
+No hardware streams opened for these UI checks. The previous version was not
+stopped; restart manually to use the updated interface. Moving the live window
+between monitors with different DPI settings still needs user validation.
+
+ORIGINAL WIZARD VALIDATION
+PASS: native C++17 build with installed MSVC and Windows SDK.
+PASS: original beamformer synthetic direction and silence tests.
+PASS: affine mapping, rotation/reflection and held-out projection.
+PASS: rejection of degenerate/inconsistent alignment measurements.
+PASS: room gate selection; unstable, clipped and silent-channel rejection.
+PASS: calibration rejects insufficient or moving sound observations.
+PASS: strict profile serialization/parsing, truncated/nonfinite data rejection.
+PASS: binding to audio/camera IDs and resolution; failed-verification rejection.
+PASS: tracker startup/decay, stale gating and capture cancellation.
+PASS: full simulated wizard flow, atomic profile save and automatic reload.
+PASS: sensitivity changes require inside/outside retesting before persistence.
+PASS: JSON fixtures parsed independently: inside=true, outside=false, stale=null,
+      speech/person-speaking=null in every case.
+PASS: nine rendered UI states checked using generated imagery.
+
+At the final inventory check, Windows reported no connected miniDSP array or
+external icspring camera. The new hardware-ID check correctly failed instead of
+substituting another microphone. Physical calibration, room measurement and
+real inside/outside trials remain for the user after reconnecting. Speech
+classification has not been implemented and is not validated by these tests.
+
+The basic demo previously verified all 16 channels at 48 kHz ASIO with zero
+overruns; the user confirmed camera video when launching manually.
+See VALIDATION-basic.txt for the earlier context.
+
+No real calibration profile was manufactured or installed by these tests.
+Synthetic profiles and telemetry are isolated under test-output. No existing
+Ika service, Windows driver or privacy setting was changed.
